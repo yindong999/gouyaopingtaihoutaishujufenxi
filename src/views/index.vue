@@ -56,17 +56,20 @@ export default{
         // 点击数据总览触发
         dataScreening(){
             this.flag = "dataScreening";
-            this.address = "https://drug.aqdpay.com/statistics/#/dataScreening"
+                 this.address = "http://localhost:8082/#/dataScreening"
+            // this.address = "https://drug.aqdpay.com/statistics/#/dataScreening"
         },
         // 点击用户数据触发
         userData(){
             this.flag = "userData";
-            this.address = "https://drug.aqdpay.com/statistics/#/userData"
+                 this.address = "http://localhost:8082/#/userData"
+            // this.address = "https://drug.aqdpay.com/statistics/#/userData"
         },
         // 点击药品分析触发
         drugAnalyse(){
             this.flag = "drugAnalyse";
-            this.address = "https://drug.aqdpay.com/statistics/#/drugAnalyse"
+              this.address = "http://localhost:8082/#/drugAnalyse"
+            // this.address = "https://drug.aqdpay.com/statistics/#/drugAnalyse"
         },
         // 点击评价分析触发
         evaluateAnalyse(){
