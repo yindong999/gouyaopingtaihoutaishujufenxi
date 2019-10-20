@@ -116,32 +116,34 @@
       class="two_dialog"
       style="padding-bottom:50px;"
     >
-      <!-- dialog 表单内容 -->
+      <!-- 点击药品新增 或者 编辑 时，dialog 弹出框表单内容 start-->
       <el-form
         :inline="true"
         :rules="rules"
         label-position="right"
         label-class-name="workOrderStyle"
         label-width="100px"
+          ref="ruleForm"
         :hide-required-asterisk="false"
+        :model="title_val"
         style="display:flex;flex-direction:row;align-items:flex-start; flex-wrap: wrap;"
       >
         <el-form-item
           :label="item[Object.keys(item)[0]]"
           v-for="(item,index) in title_arr"
           :key="index" 
-          :hide-required-asterisk="true"
           :status-icon="true"
+          :prop="Object.keys(item)[0]"
         >
-          <el-select v-if="Object.keys(item)[0] === 'is_external_used'" v-model="title_val[Object.keys(item)[0]]" style="width:300px;" placeholder="请选择活动区域">
+          <el-select v-if="Object.keys(item)[0] === 'is_external_used'" v-model="title_val[Object.keys(item)[0]]" style="width:300px;" placeholder="请选择是否外用药">
             <el-option label="是" value="1"></el-option>
             <el-option label="否" value="2"></el-option>
           </el-select>
-          <el-select v-else-if="Object.keys(item)[0] === 'otc_or_rx'" v-model="title_val[Object.keys(item)[0]]" style="width:300px;" placeholder="请选择药品类型">
+          <el-select v-else-if="Object.keys(item)[0] === 'otc_or_rx'" v-model="title_val[Object.keys(item)[0]]" style="width:300px;" placeholder="请选择是否OTC">
             <el-option label="外服" value="1"></el-option>
             <el-option label="内用" value="2"></el-option>
           </el-select>
-          <el-select v-else-if="Object.keys(item)[0] === 'otc_level'" v-model="title_val[Object.keys(item)[0]]" style="width:300px;" placeholder="请选择是否类型">
+          <el-select v-else-if="Object.keys(item)[0] === 'otc_level'" v-model="title_val[Object.keys(item)[0]]" style="width:300px;" placeholder="请选择OTC级别">
             <el-option label="一级" value="1"></el-option>
             <el-option label="二级" value="2"></el-option>
             <el-option label="三级" value="3"></el-option>
@@ -162,14 +164,14 @@
             <el-option label="e" value="1"></el-option>
             <el-option label="f" value="2"></el-option>
           </el-select>
-           <el-input v-else v-model="title_val[Object.keys(item)[0]]" style="width:300px"></el-input>
+           <el-input v-else v-model="title_val[Object.keys(item)[0]]" style="width:300px" :placeholder="'请输入'+item[Object.keys(item)[0]]"></el-input>
         </el-form-item>
 
         <el-form-item label="孕妇及哺乳期妇女用药" class="itemList" >
-          <el-input v-model="pregnant_and_lactating_women" style="width:300px"></el-input>
+          <el-input v-model="pregnant_and_lactating_women" style="width:300px" placeholder="请输入孕妇及哺乳期妇女用药说明"></el-input>
         </el-form-item>
-        <!--  { pregnant_and_lactating_women: "孕妇及哺乳期妇女用药" }, -->
       </el-form>
+         <!-- 点击药品新增 或者 编辑 时，dialog 弹出框表单内容 end  -->
       <el-upload
         action="https://jsonplaceholder.typicode.com/posts/"
         list-type="picture-card"
@@ -182,11 +184,10 @@
       <el-dialog :visible.sync="visible">
         <img width="100%" :src="dialogImageUrl" alt />
       </el-dialog>
-      <!-- <el-alert v-if="isImg" title="图片格式不对或者大小太大" type="error" effect="dark" ></el-alert> -->
-      <el-row class="intro" style="margin-top:10px;">只支持JPG,PNG格式，大小不超过10M。</el-row>
+      <el-row class="intro" style="margin-top:10px;">只支持JPG,JPEG,PNG格式，大小不超过10M。</el-row>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="handleClose">取 消</el-button>
-        <el-button type="primary" @click="submit_drug_msg">确 定</el-button>
+        <el-button @click="handleClose('ruleForm')">取 消</el-button>
+        <el-button type="primary" @click="submit_drug_msg('ruleForm')">确 定</el-button>
       </span>
     </el-dialog>
   </el-container>
@@ -194,17 +195,48 @@
 
 <script>
 export default {
-  data() {
+  data() { 
     return {
         rules: { // 校验规则
+        // 唯一码校验规则
           guid: [
-            { required: true, message: '请输入唯一码', trigger: 'blur' }
+            { required: true,min: 1, message: '请输入唯一码', trigger: 'blur' }
           ],
+          // 通用名称校验规则
           common_name: [
-            { required: true, message: '请输入药品名称', trigger: 'blur' }
+            { required: true, message: '请输入通用名称', trigger: 'blur' }
           ],
+          // 产品名称校验规则
            product_name:[
-            { required: true, message: '请输入产品名称', trigger: 'blur' }
+           { required: true, message: '请输入产品名称', trigger: 'blur' }
+          ],
+          // 是否外用药校验规则
+           is_external_used:[
+           { required: true, message: '请选择是否外用药', trigger: 'change' }
+          ],
+          // 药品类型校验规则
+           type:[
+           { required: true, message: '请选择药品类型', trigger: 'change' }
+          ],
+          // 是否OTC校验规则
+           otc_or_rx:[
+           { required: true, message: '请选择是否OTC', trigger: 'change' }
+          ],
+          // OTC级别校验规则
+           otc_level:[
+           { required: true, message: '请选择OTC级别', trigger: 'change' }
+          ],
+          // 一级校验规则
+           c1_id:[
+           { required: true, message: '请选择一级分类', trigger: 'change' }
+          ],
+          // 二级校验规则
+           c2_id:[
+           { required: true, message: '请选择二级分类', trigger: 'change' }
+          ],
+          // 三级校验规则
+           c3_id:[
+           { required: true, message: '请选择三级分类', trigger: 'change' }
           ],
         },
       
@@ -498,12 +530,12 @@ export default {
       console.log("文件类型", file);
       const isJPG = file.type == "image/jpg" || "image/jpeg" || "image/png";
       const isJPG2 = file.type ==  "image/png";
-      const isLt2M = file.size / 1024 / 10240 > 10;
+      const isLt2M = file.size / 1024 / 10240 < 10;
       console.log("wenjianleix ", isJPG);
       if (!isJPG) {
         this.$message.error("上传头像图片只能是 JPG,PNG 格式!");
       }
-      if (isLt2M) {
+      if (!isLt2M) {
         this.$message.error("上传头像图片大小不能超过 10MB!");
       }
       return isJPG && isLt2M;
@@ -515,37 +547,48 @@ export default {
       document.getElementsByClassName("v-modal")[0].style.display = "none";
     },
     // 点击取消或者叉号按钮的时候触发
-    handleClose() {
+    handleClose(formName) {
       this.$confirm("确认关闭？")
         .then(_ => {
           this.dialogVisible = false;
           this.isError = false;
+           this.$refs[formName].resetFields();
         })
         .catch(_ => {});
     },
     // 点击确定触发
-    submit_drug_msg() {
-      // 需要判断从新增
-      this.dialogVisible = false;
-      console.log("liebiao :",this.title_val)
-      this.tableData.push(this.title_val)
+    submit_drug_msg(formName) {
+       
+      this.$refs[formName].validate((valid) => {
+       
+          if (valid) {
+            alert('submit!');
+             this.tableData.push(this.title_val)
+            // 需要判断是点击药品新增按钮触发的弹窗还是点击编辑触发的
+            this.dialogVisible = false; // 关闭弹窗
+          } else {
+             alert('error submit!');
+            return false;
+          }
+        });
+      
+
     },
     // 点击药品新增触发
     drug_dialog(flag, param1, param2) {
-      console.log("fdfdfdfdfdf :",param2)
        this.dialogVisible = true;
         this.drug_style = flag;
       if(flag==="药品新增"){
             console.log("liebiao :",this.title_val)
       }else if(flag==="药品编辑"){
          this.title_val = param2;
+         console.log("---------",param2)
+        
       }
-    
     },
     // 点击删除触发
     drug_delete(val1,val2){
-    
-          // 数组原型上添加一个方法用于删除某一个元素
+       // 数组原型上添加一个方法用于删除某一个元素
       Array.prototype.remove = function(val) {
           this.splice(val, 1);
       };
